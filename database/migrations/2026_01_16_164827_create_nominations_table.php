@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('nominations', function (Blueprint $table) {
-            $table->id();
+           $table->id();
+            $table->string('period'); // e.g., '2026-01'
+            $table->enum('status', ['pending', 'approved', 'rejected', 'paid'])->default('pending');
             $table->timestamps();
         });
     }

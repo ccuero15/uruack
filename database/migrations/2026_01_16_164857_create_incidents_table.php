@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('incidents', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('nomination_id')->constrained()->onDelete(action: 'cascade');
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->text('description');
             $table->timestamps();
         });
     }

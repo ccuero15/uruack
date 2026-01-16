@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('nomination_details', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('nomination_id')->constrained()->onDelete('cascade');
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
+            $table->foreignId('concept_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount', 10, 2);
             $table->timestamps();
         });
     }

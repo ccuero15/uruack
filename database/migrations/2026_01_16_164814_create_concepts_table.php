@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('concepts', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->enum('type', ['assignment', 'deduction']);
+            $table->decimal('value', 10, 2); // Fixed amount or percentage (if is_percentage true)
+            $table->boolean('is_percentage')->default(false); // If true, value is % of base_salary
             $table->timestamps();
         });
     }
