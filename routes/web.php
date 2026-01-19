@@ -30,6 +30,12 @@ Route::middleware('auth')->group(function () {
     Route::post('nominations/{nomination}/process', [NominationController::class, 'process'])->name('nominations.process');
     Route::post('nominations/{nomination}/approve', [NominationController::class, 'approve'])->name('nominations.approve');
     Route::post('nominations/{nomination}/reject', [NominationController::class, 'reject'])->name('nominations.reject');
+
+    // Preview / confirmation
+    Route::get('nominations/{nomination}/process', [NominationController::class, 'showProcessPreview'])->name('nominations.process.preview');
+
+    // Actual processing
+    Route::post('nominations/{nomination}/process/confirm', [NominationController::class, 'confirmProcess'])->name('nominations.process.confirm');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -31,6 +31,8 @@ class NominationController extends Controller
 
     public function show(Nomination $nomination)
     {
+        $nomination->load('details', 'incidents.employee'); // carga relaciones necesarias
+
         return view('nominations.show', compact('nomination'));
     }
 
@@ -56,50 +58,53 @@ class NominationController extends Controller
     public function process(Nomination $nomination)
     {
         if ($nomination->status !== 'pending') {
-            return redirect()->back()->with('error', 'Nomination already processed.');
+            return redirect()->back()->with('error', 'La nómina ya fue procesada.');
         }
 
-        $employees = Employee::where('active', true)->get();
-        $concepts = Concept::all(); // Assume all concepts apply to all employees for simplicity; customize if needed
+        $employees = Employee::where('active', true)->with('position')->get(); // ← carga la relación position
+        $concepts  = Concept::all();
 
         $preliminary = [];
-        $incidents = [];
+        $incidents   = [];
 
         foreach ($employees as $employee) {
             $assignments = 0;
-            $deductions = 0;
+            $deductions  = 0;
+            $employeeDetails = []; // siempre inicializamos
 
             foreach ($concepts as $concept) {
-                $amount = $concept->is_percentage ? ($employee->base_salary * $concept->value / 100) : $concept->value;
+                $amount = $concept->is_percentage
+                    ? ($employee->base_salary * $concept->value / 100)
+                    : $concept->value;
+
+                $employeeDetails[] = [
+                    'concept' => $concept,
+                    'amount'  => $amount,
+                ];
 
                 if ($concept->type === 'assignment') {
                     $assignments += $amount;
                 } else {
                     $deductions += $amount;
                 }
-
-                // Temp save for preliminary
-                $preliminary[$employee->id]['details'][] = [
-                    'concept' => $concept,
-                    'amount' => $amount,
-                ];
             }
 
             $net_pay = $employee->base_salary + $assignments - $deductions;
 
-            // Error detection (e.g., negative pay)
             if ($net_pay < 0) {
                 $incidents[] = [
-                    'employee' => $employee,
-                    'description' => 'Negative net pay: ' . $net_pay,
+                    'employee'    => $employee,
+                    'description' => "Pago neto negativo: " . number_format($net_pay, 2),
                 ];
             }
 
-            $preliminary[$employee->id]['net_pay'] = $net_pay;
-            $preliminary[$employee->id]['employee'] = $employee;
+            $preliminary[$employee->id] = [
+                'employee' => $employee,
+                'details'  => $employeeDetails,     // ← siempre presente (puede estar vacío)
+                'net_pay'  => $net_pay,
+            ];
         }
 
-        // Show preliminary summary
         return view('nominations.process', compact('nomination', 'preliminary', 'incidents'));
     }
 
@@ -147,5 +152,64 @@ class NominationController extends Controller
         $nomination->update(['status' => 'rejected']);
 
         return redirect()->route('nominations.show', $nomination)->with('error', 'Nomination rejected. Correct data and retry.');
+    }
+
+    /**
+     * Muestra la vista de previsualización/procesamiento (GET)
+     * Ideal para ver el resumen sin confirmar la acción
+     */
+    public function showProcessPreview(Nomination $nomination)
+    {
+        if ($nomination->status !== 'pending') {
+            return redirect()->route('nominations.show', $nomination)
+                ->with('error', 'Esta nómina ya fue procesada o rechazada.');
+        }
+
+        // Reutilizamos la misma lógica de cálculo que en process()
+        $employees = Employee::where('active', true)->with('position')->get();
+        $concepts  = Concept::all();
+
+        $preliminary = [];
+        $incidents   = [];
+
+        foreach ($employees as $employee) {
+            $assignments = 0;
+            $deductions  = 0;
+            $employeeDetails = [];
+
+            foreach ($concepts as $concept) {
+                $amount = $concept->is_percentage
+                    ? ($employee->base_salary * $concept->value / 100)
+                    : $concept->value;
+
+                $employeeDetails[] = [
+                    'concept' => $concept,
+                    'amount'  => $amount,
+                ];
+
+                if ($concept->type === 'assignment') {
+                    $assignments += $amount;
+                } else {
+                    $deductions += $amount;
+                }
+            }
+
+            $net_pay = $employee->base_salary + $assignments - $deductions;
+
+            if ($net_pay < 0) {
+                $incidents[] = [
+                    'employee'    => $employee,
+                    'description' => "Neto negativo detectado: " . number_format($net_pay, 2),
+                ];
+            }
+
+            $preliminary[$employee->id] = [
+                'employee' => $employee,
+                'details'  => $employeeDetails,
+                'net_pay'  => $net_pay,
+            ];
+        }
+
+        return view('nominations.process', compact('nomination', 'preliminary', 'incidents'));
     }
 }

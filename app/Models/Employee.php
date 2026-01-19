@@ -20,4 +20,9 @@ class Employee extends Model
     {
         return $this->hasMany(Incident::class);
     }
+
+    public function position()
+{
+    return $this->belongsTo(Position::class, 'position', 'id');
+}
 }
