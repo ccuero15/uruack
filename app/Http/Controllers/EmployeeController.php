@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\Position;
 use Illuminate\Http\Request;
 
 class EmployeeController extends Controller
@@ -10,18 +11,23 @@ class EmployeeController extends Controller
     public function index()
     {
         $employees = Employee::all();
-        return view('employees.index', compact('employees'));
+        $positions = Position::all();
+        return view('employees.index', compact('employees', 'positions'));
     }
 
     public function create()
     {
-        return view('employees.create');
+        $positions = Position::all();
+        return view('employees.create', compact('positions'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required',
+            'last_name' => 'required',
+            'dni' => 'required|integer|digits:8|unique:employees,dni',
+            'position' => 'required',
             'base_salary' => 'required|numeric',
         ]);
 
@@ -31,18 +37,23 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
-        return view('employees.show', compact('employee'));
+        $positions = Position::all();
+        return view('employees.show', compact('employee', 'positions'));
     }
 
     public function edit(Employee $employee)
     {
-        return view('employees.edit', compact('employee'));
+        $positions = Position::all();
+        return view('employees.edit', compact('employee', 'positions'));
     }
 
     public function update(Request $request, Employee $employee)
     {
         $request->validate([
             'name' => 'required',
+            'last_name' => 'required',
+            'dni' => 'required',
+            'position' => 'required',
             'base_salary' => 'required|numeric',
         ]);
 

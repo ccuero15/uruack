@@ -9,7 +9,7 @@ class Employee extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'position', 'base_salary', 'active'];
+    protected $fillable = ['name', 'last_name', 'dni', 'position', 'base_salary', 'active'];
 
     public function nominationDetails()
     {
