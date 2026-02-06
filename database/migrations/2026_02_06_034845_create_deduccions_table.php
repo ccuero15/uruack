@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('positions', function (Blueprint $table) {
+        Schema::create('deducciones', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('description');
+            $table->string('nombre', 100);
+            $table->decimal('tasa', 5, 2)->comment('Porcentaje o valor fijo');
+            $table->string('tipo', 20)->comment('Fijo, Porcentaje');
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('positions');
+        Schema::dropIfExists('deducciones');
     }
 };

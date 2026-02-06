@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('nominations', function (Blueprint $table) {
-           $table->id();
-            $table->string('period'); // e.g., '2026-01'
-            $table->enum('status', ['pending', 'approved', 'rejected', 'paid'])->default('pending');
+        Schema::create('tipos_contrato', function (Blueprint $table) {
+            $table->id();
+            $table->string('nombre', 50);
+            $table->text('descripcion')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('nominations');
+        Schema::dropIfExists('tipos_contrato');
     }
 };

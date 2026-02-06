@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('item_nomina_deduccion', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('last_name');
-            $table->integer('dni')->unique();
-            $table->string('position')->nullable();
-            $table->decimal('base_salary', 10, 2);
-            $table->boolean('active')->default(true);
+            $table->foreignId('item_nomina_id')->constrained('item_nomina')->onDelete('cascade');
+            $table->foreignId('deduccion_id')->constrained('deducciones');
+            $table->decimal('monto', 12, 2);
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('item_nomina_deduccion');
     }
 };

@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('nomination_details', function (Blueprint $table) {
+        Schema::create('recibos_pago', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('nomination_id')->constrained()->onDelete('cascade');
-            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->foreignId('concept_id')->constrained()->onDelete('cascade');
-            $table->decimal('amount', 10, 2);
+            $table->foreignId('item_nomina_id')->unique()->constrained('item_nomina')->onDelete('cascade');
+            $table->date('fecha_emision');
+            $table->string('codigo_verificacion', 100)->nullable();
+            $table->string('ruta_pdf', 255)->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('nomination_details');
+        Schema::dropIfExists('recibos_pago');
     }
 };

@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('concepts', function (Blueprint $table) {
+        Schema::create('ejecucion_nomina', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('type', ['assignment', 'deduction']);
-            $table->decimal('value', 10, 2); // Fixed amount or percentage (if is_percentage true)
-            $table->boolean('is_percentage')->default(false); // If true, value is % of base_salary
+            $table->date('periodo_inicio');
+            $table->date('periodo_fin');
+            $table->dateTime('fecha_ejecucion')->useCurrent();
+            $table->string('estado', 20)->default('Borrador')->comment('Borrador, Procesada, Pagada');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('concepts');
+        Schema::dropIfExists('ejecucion_nomina');
     }
 };
