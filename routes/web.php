@@ -1,8 +1,7 @@
 <?php
 
-use App\Http\Controllers\ConceptController;
-use App\Http\Controllers\EmployeeController;
-use App\Http\Controllers\NominationController;
+
+use App\Http\Controllers\NominaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,18 +23,12 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware('auth')->group(function () {
-    Route::resource('employees', EmployeeController::class);
-    Route::resource('concepts', ConceptController::class);
-    Route::resource('nominations', NominationController::class);
-    Route::post('nominations/{nomination}/process', [NominationController::class, 'process'])->name('nominations.process');
-    Route::post('nominations/{nomination}/approve', [NominationController::class, 'approve'])->name('nominations.approve');
-    Route::post('nominations/{nomination}/reject', [NominationController::class, 'reject'])->name('nominations.reject');
 
-    // Preview / confirmation
-    Route::get('nominations/{nomination}/process', [NominationController::class, 'showProcessPreview'])->name('nominations.process.preview');
-
-    // Actual processing
-    Route::post('nominations/{nomination}/process/confirm', [NominationController::class, 'confirmProcess'])->name('nominations.process.confirm');
+    Route::prefix('nomina')->group(function () {
+        Route::post('/procesar', [NominaController::class, 'procesar'])->name('nomina.procesar');
+        Route::get('/ejecuciones', [NominaController::class, 'index']); // Listado de nóminas
+        Route::get('/recibo/{id}', [NominaController::class, 'verRecibo']); // Ver PDF
+    });
 });
 
 require __DIR__ . '/auth.php';
