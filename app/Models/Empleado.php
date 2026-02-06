@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Empleado extends Model
 {
+protected $fillable = [
+        'cedula',
+        'nombre',
+        'apellido',
+        'email',
+        'fecha_ingreso',
+        'estado'
+    ];
+
     public function contratos()
     {
         return $this->hasMany(Contrato::class, 'empleado_id');

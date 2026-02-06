@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             CargoSeeder::class,
             ConceptosNominaSeeder::class,
             UserSeeder::class,
+            TipoIncidenciaSeeder::class,
         ]);
 
         // Crear un usuario administrador de prueba relacionado con el Rol 1
