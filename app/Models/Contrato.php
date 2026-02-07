@@ -2,24 +2,51 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Contrato extends Model
 {
-    protected $table = [];
+    use HasFactory;
+
+    // Nombre de la tabla (opcional si sigue la convención plural)
+    protected $table = 'contratos';
+
+    // Campos que se pueden llenar masivamente
+    protected $fillable = [
+        'empleado_id',
+        'cargo_id',
+        'jornada_id', // <--- Asegúrate de que esté aquí
+        'fecha_inicio',
+        'fecha_fin',
+        'salario_base',
+        'tipo_contrato',
+        'estado',
+    ];
+
+    /**
+     * Relación: Un contrato pertenece a un empleado.
+     */
     public function empleado()
     {
         return $this->belongsTo(Empleado::class);
     }
 
+    /**
+     * Relación: Un contrato tiene asignado un cargo.
+     */
     public function cargo()
     {
         return $this->belongsTo(Cargo::class);
     }
 
-    public function tipoContrato()
+    /**
+     * Scope opcional: Ayuda a obtener solo el contrato vigente fácilmente
+     * Uso: Contrato::vigente()->get();
+     */
+    public function scopeVigente($query)
     {
-        return $this->belongsTo(TipoContrato::class, 'tipo_contrato_id');
+        return $query->where('estado', 'Vigente');
     }
 
     public function jornada()

@@ -8,6 +8,7 @@ use App\Http\Controllers\DeduccionController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\IncidenciaController;
 use App\Http\Controllers\NominaController;
+use App\Http\Controllers\NominaReporteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TipoIncidenciaController;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('empleados', EmpleadoController::class);
     // Route::resource('contratos', ContratoController::class);
     // Route::resource('cargos', CargoController::class);
+
+    Route::get('/nomina/reporte-general/{id}', [NominaReporteController::class, 'general'])->name('nomina.reporte.general');
 
     // Configuración de Nómina
     Route::resource('deducciones', DeduccionController::class)->except(['show', 'create', 'edit']);

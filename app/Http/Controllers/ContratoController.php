@@ -1,18 +1,19 @@
-<?
+<?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Contrato;
 use App\Models\Empleado;
 use App\Models\Cargo;
-use App\Models\TipoContrato;
 use App\Models\JornadaLaboral;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ContratoController extends Controller
 {
     public function index()
     {
-        $contratos = Contrato::with(['empleado', 'cargo'])->orderBy('id', 'desc')->paginate(10);
+        $contratos = Contrato::with(['empleado', 'cargo'])->paginate(10);
         return view('contratos.index', compact('contratos'));
     }
 
@@ -20,60 +21,46 @@ class ContratoController extends Controller
     {
         $empleados = Empleado::where('estado', 'Activo')->get();
         $cargos = Cargo::all();
-        $tipos = TipoContrato::all();
         $jornadas = JornadaLaboral::all();
-        return view('contratos.create', compact('empleados', 'cargos', 'tipos', 'jornadas'));
+        return view('contratos.create', compact('empleados', 'cargos', 'jornadas'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'empleado_id' => 'required|exists:empleados,id',
-            'cargo_id' => 'required|exists:cargos,id',
-            'tipo_contrato_id' => 'required|exists:tipos_contrato,id',
-            'jornada_id' => 'required|exists:jornadas_laborales,id',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'nullable|date|after:fecha_inicio',
-            'salario_pactado' => 'required|numeric|min:0',
-            'estado' => 'required|string'
-        ]);
+        try {
+            // 1. Validación estricta
+            $data = $request->validate([
+                'empleado_id'   => 'required|exists:empleados,id',
+                'cargo_id'      => 'required|exists:cargos,id',
+                'jornada_id'    => 'required|exists:jornadas_laborales,id',
+                'fecha_inicio'  => 'required|date',
+                'fecha_fin'     => 'nullable|date|after_or_equal:fecha_inicio',
+                'salario_base'  => 'required|numeric|min:0',
+                'tipo_contrato' => 'required|string|max:100',
+                'estado'        => 'required|in:Vigente,Vencido,Finalizado',
+            ]);
 
-        // Si el nuevo contrato es 'Vigente', ponemos los anteriores del empleado como 'Vencido'
-        if ($data['estado'] === 'Vigente') {
-            Contrato::where('empleado_id', $data['empleado_id'])->update(['estado' => 'Vencido']);
+            // 2. Transacción para asegurar integridad
+            DB::transaction(function () use ($data, $request) {
+                // Desactivar contratos previos para este empleado
+                Contrato::where('empleado_id', $request->empleado_id)
+                    ->where('estado', 'Vigente')
+                    ->update(['estado' => 'Finalizado']);
+
+                // Crear el nuevo contrato
+                Contrato::create($data);
+            });
+
+            return redirect()->route('contratos.index')
+                ->with('success', 'Contrato vinculado exitosamente.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Laravel maneja esto y vuelve a la vista con $errors
+            throw $e;
+        } catch (\Exception $e) {
+            // Error de base de datos o lógica (ej: el error de null que tenías)
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error al procesar el contrato: ' . $e->getMessage());
         }
-
-        Contrato::create($data);
-        return redirect()->route('contratos.index')->with('success', 'Contrato creado exitosamente.');
-    }
-
-    public function edit(Contrato $contrato)
-    {
-        $empleados = Empleado::all();
-        $cargos = Cargo::all();
-        $tipos = TipoContrato::all();
-        $jornadas = JornadaLaboral::all();
-        return view('contratos.edit', compact('contrato', 'empleados', 'cargos', 'tipos', 'jornadas'));
-    }
-
-    public function update(Request $request, Contrato $contrato)
-    {
-        $data = $request->validate([
-            'cargo_id' => 'required|exists:cargos,id',
-            'tipo_contrato_id' => 'required|exists:tipos_contrato,id',
-            'jornada_id' => 'required|exists:jornadas_laborales,id',
-            'salario_pactado' => 'required|numeric|min:0',
-            'estado' => 'required|string',
-            'fecha_fin' => 'nullable|date'
-        ]);
-
-        $contrato->update($data);
-        return redirect()->route('contratos.index')->with('success', 'Contrato actualizado.');
-    }
-
-    public function destroy(Contrato $contrato)
-    {
-        $contrato->delete();
-        return redirect()->route('contratos.index')->with('success', 'Contrato eliminado.');
     }
 }

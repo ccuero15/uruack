@@ -31,6 +31,12 @@
                     <x-nav-link :href="route('incidencias.index')" :active="request()->routeIs('incidencias.*')">
                         {{ __('Incidencias') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('contratos.index')" :active="request()->routeIs('contratos.*')">
+                        {{ __('Contratos') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('cargos.index')" :active="request()->routeIs('cargos.*')">
+                        {{ __('Cargos') }}
+                    </x-nav-link>
                 </div>
             </div>
 

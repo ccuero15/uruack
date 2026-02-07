@@ -27,42 +27,60 @@ class NominaController extends Controller
     // Proceso masivo de generación
     public function procesar(Request $request, NominaService $service)
     {
+        // 1. Ajustamos la regla para permitir procesar un solo día si es necesario
         $request->validate([
             'periodo_inicio' => 'required|date',
-            'periodo_fin' => 'required|date|after:periodo_inicio',
+            'periodo_fin'    => 'required|date|after_or_equal:periodo_inicio',
+        ], [
+            'periodo_fin.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la de inicio.'
         ]);
 
         try {
             DB::beginTransaction();
 
-            // 1. Crear cabecera
-            $ejecucion = EjecucionNomina::create([
-                'periodo_inicio' => $request->periodo_inicio,
-                'periodo_fin'    => $request->periodo_fin,
-                'fecha_ejecucion' => now(),
-                'estado'         => 'Procesada'
-            ]);
-
-            // 2. Obtener empleados con contrato vigente
+            // 2. Obtener empleados primero para no crear la cabecera en vano
             $empleados = Empleado::where('estado', 'Activo')
                 ->whereHas('contratos', function ($q) {
                     $q->where('estado', 'Vigente');
                 })->get();
 
             if ($empleados->isEmpty()) {
-                throw new \Exception('No hay empleados activos con contratos vigentes.');
+                throw new \Exception('No se encontraron empleados activos con contratos vigentes para este periodo.');
             }
 
-            // 3. Procesar cada empleado usando el Servicio
+            // 3. Crear cabecera (Asegúrate de que la tabla tenga 'total_pagado' si el servicio no lo llena)
+            $ejecucion = EjecucionNomina::create([
+                'periodo_inicio'  => $request->periodo_inicio,
+                'periodo_fin'     => $request->periodo_fin,
+                'fecha_ejecucion' => now(),
+                'total_pagado'    => 0, // Lo actualizaremos después del bucle
+                'estado'          => 'Procesada'
+            ]);
+
+            $totalNomina = 0;
+
+            // 4. Procesar cada empleado
             foreach ($empleados as $empleado) {
-                $service->procesarEmpleado($ejecucion->id, $empleado->id);
+                // El servicio debe retornar el monto neto calculado para sumarizar
+                $item = $service->procesarEmpleado($ejecucion->id, $empleado->id);
+                $totalNomina += $item->salario_neto;
             }
+
+            // 5. Actualizar el total general de la nómina
+            $ejecucion->update(['total_pagado' => $totalNomina]);
 
             DB::commit();
-            return redirect()->route('nomina.show', $ejecucion->id)->with('success', 'Nómina procesada correctamente.');
+
+            return redirect()->route('nomina.index') // O show
+                ->with('success', 'Nómina procesada correctamente. Total: $' . number_format($totalNomina, 2));
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+            // Logueamos el error para debug interno
+            \Log::error("Error procesando nómina: " . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error: ' . $e->getMessage());
         }
     }
 

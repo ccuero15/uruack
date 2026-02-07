@@ -21,7 +21,7 @@ class NominaService
 
             if (!$contrato) return null;
 
-            $salarioBruto = $contrato->salario_pactado;
+            $salarioBruto = $contrato->salario_base;
             $totalDeducciones = 0;
             $totalBeneficios = 0;
 

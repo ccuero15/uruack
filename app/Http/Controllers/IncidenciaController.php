@@ -9,26 +9,50 @@ use Illuminate\Http\Request;
 
 class IncidenciaController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $incidencias = Incidencia::with(['empleado', 'tipoIncidencia'])
             ->orderBy('fecha_inicio', 'desc')
             ->paginate(15);
         return view('incidencias.index', compact('incidencias'));
     }
 
-    public function create() {
+    public function create()
+    {
         $empleados = Empleado::where('estado', 'Activo')->get();
         $tipos = TipoIncidencia::all();
         return view('incidencias.create', compact('empleados', 'tipos'));
     }
 
-    public function edit(Incidencia $incidencia) {
+    public function store(Request $request)
+    {
+        // 1. Validar los datos que vienen del formulario
+        $data = $request->validate([
+            'empleado_id' => 'required|exists:empleados,id',
+            'tipo_incidencia_id' => 'required|exists:tipos_incidencia,id',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+            'horas_extras' => 'nullable|numeric|min:0',
+            'observacion' => 'nullable|string|max:255',
+        ]);
+
+        // 2. Crear el registro en la base de datos
+        Incidencia::create($data);
+
+        // 3. Redireccionar con mensaje de éxito
+        return redirect()->route('incidencias.index')
+            ->with('success', 'La incidencia ha sido registrada correctamente y será tomada en cuenta para la próxima nómina.');
+    }
+
+    public function edit(Incidencia $incidencia)
+    {
         $empleados = Empleado::all();
         $tipos = TipoIncidencia::all();
         return view('incidencias.edit', compact('incidencia', 'empleados', 'tipos'));
     }
 
-    public function update(Request $request, Incidencia $incidencia) {
+    public function update(Request $request, Incidencia $incidencia)
+    {
         $data = $request->validate([
             'empleado_id' => 'required|exists:empleados,id',
             'tipo_incidencia_id' => 'required|exists:tipos_incidencia,id',
@@ -42,7 +66,8 @@ class IncidenciaController extends Controller
         return redirect()->route('incidencias.index')->with('success', 'Incidencia actualizada.');
     }
 
-    public function destroy(Incidencia $incidencia) {
+    public function destroy(Incidencia $incidencia)
+    {
         $incidencia->delete();
         return redirect()->route('incidencias.index')->with('success', 'Incidencia eliminada.');
     }
