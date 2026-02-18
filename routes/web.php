@@ -57,8 +57,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('incidencias', IncidenciaController::class);
     Route::prefix('nomina')->group(function () {
         Route::get('/', [NominaController::class, 'index'])->name('nomina.index');
-        Route::get('/crear', [NominaController::class, 'create'])->name('nomina.create'); // <--- ESTA ES LA QUE FALTA
-        Route::post('/procesar', [NominaController::class, 'procesar'])->name('nomina.procesar');
+        Route::get('/crear', [NominaController::class, 'create'])->name('nomina.create');
+        Route::post('/', [NominaController::class, 'store'])->name('nomina.store');
+        Route::post('/{id}/procesar', [NominaController::class, 'procesar'])->name('nomina.procesar');
         Route::get('/detalle/{id}', [NominaController::class, 'show'])->name('nomina.show');
         Route::get('/recibo/{id}', [NominaController::class, 'verRecibo'])->name('nomina.recibo');
     });

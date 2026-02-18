@@ -24,21 +24,46 @@ class NominaController extends Controller
         return view('nomina.create');
     }
 
-    // Proceso masivo de generación
-    public function procesar(Request $request, NominaService $service)
+    // Guardar el borrador inicial
+    public function store(Request $request)
     {
-        // 1. Ajustamos la regla para permitir procesar un solo día si es necesario
         $request->validate([
             'periodo_inicio' => 'required|date',
             'periodo_fin'    => 'required|date|after_or_equal:periodo_inicio',
-        ], [
-            'periodo_fin.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la de inicio.'
+            'comentario'     => 'nullable|string'
         ]);
+
+        EjecucionNomina::create([
+            'periodo_inicio'  => $request->periodo_inicio,
+            'periodo_fin'     => $request->periodo_fin,
+            'fecha_ejecucion' => now(),
+            'total_pagado'    => 0,
+            'estado'          => 'Borrador',
+            'comentario'      => $request->comentario ?? 'Borrador creado manualmente'
+        ]);
+
+        return redirect()->route('nomina.index')
+            ->with('success', 'Borrador de nómina creado correctamente.');
+    }
+
+    // Proceso masivo de generación
+    public function procesar($id, NominaService $service)
+    {
+        $ejecucion = EjecucionNomina::findOrFail($id);
+
+        if ($ejecucion->estado == 'Procesada') {
+            return redirect()->route('nomina.index')->with('error', 'Esta nómina ya ha sido procesada.');
+        }
 
         try {
             DB::beginTransaction();
 
-            // 2. Obtener empleados primero para no crear la cabecera en vano
+            $ejecucion->update([
+                'estado' => 'Procesando...',
+                'comentario' => 'Cálculo en progreso...'
+            ]);
+
+            // 2. Obtener empleados activos con contratos vigentes
             $empleados = Empleado::where('estado', 'Activo')
                 ->whereHas('contratos', function ($q) {
                     $q->where('estado', 'Vigente');
@@ -48,39 +73,40 @@ class NominaController extends Controller
                 throw new \Exception('No se encontraron empleados activos con contratos vigentes para este periodo.');
             }
 
-            // 3. Crear cabecera (Asegúrate de que la tabla tenga 'total_pagado' si el servicio no lo llena)
-            $ejecucion = EjecucionNomina::create([
-                'periodo_inicio'  => $request->periodo_inicio,
-                'periodo_fin'     => $request->periodo_fin,
-                'fecha_ejecucion' => now(),
-                'total_pagado'    => 0, // Lo actualizaremos después del bucle
-                'estado'          => 'Procesada'
-            ]);
-
             $totalNomina = 0;
 
-            // 4. Procesar cada empleado
+            // 3. Procesar cada empleado
             foreach ($empleados as $empleado) {
-                // El servicio debe retornar el monto neto calculado para sumarizar
                 $item = $service->procesarEmpleado($ejecucion->id, $empleado->id);
-                $totalNomina += $item->salario_neto;
+                if ($item) {
+                    $totalNomina += $item->salario_neto;
+                }
             }
 
-            // 5. Actualizar el total general de la nómina
-            $ejecucion->update(['total_pagado' => $totalNomina]);
+            // 4. Actualizar el registro con éxito
+            $ejecucion->update([
+                'total_pagado' => $totalNomina,
+                'estado'       => 'Procesada',
+                'comentario'   => 'Nómina procesada exitosamente para ' . $empleados->count() . ' empleados el ' . now()->format('d/m/Y H:i')
+            ]);
 
             DB::commit();
 
-            return redirect()->route('nomina.index') // O show
+            return redirect()->route('nomina.index')
                 ->with('success', 'Nómina procesada correctamente. Total: $' . number_format($totalNomina, 2));
         } catch (\Exception $e) {
             DB::rollBack();
-            // Logueamos el error para debug interno
-            \Log::error("Error procesando nómina: " . $e->getMessage());
 
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Error: ' . $e->getMessage());
+            // 5. Registrar el error en el comentario de la ejecución
+            $ejecucion->update([
+                'estado'     => 'No Procesada',
+                'comentario' => 'Error al procesar: ' . $e->getMessage()
+            ]);
+
+            \Log::error("Error procesando nómina ID {$ejecucion->id}: " . $e->getMessage());
+
+            return redirect()->route('nomina.index')
+                ->with('error', 'Error al procesar: ' . $e->getMessage());
         }
     }
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class EjecucionNomina extends Model
 {
     protected $table = 'ejecucion_nomina';
-    protected $fillable = ['periodo_inicio', 'periodo_fin', 'fecha_ejecucion', 'estado'];
+    protected $fillable = ['periodo_inicio', 'periodo_fin', 'fecha_ejecucion', 'estado', 'comentario', 'total_pagado'];
 
     public function items()
     {
