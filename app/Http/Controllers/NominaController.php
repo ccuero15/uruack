@@ -8,6 +8,7 @@ use App\Models\ItemNomina;
 use App\Services\NominaService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -30,9 +31,12 @@ class NominaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'periodo_inicio' => 'required|date',
-            'periodo_fin'    => 'required|date|after_or_equal:periodo_inicio',
+            'periodo_inicio' => 'required|date|before_or_equal:now',
+            'periodo_fin'    => 'required|date|after_or_equal:periodo_inicio|before_or_equal:now',
             'comentario'     => 'nullable|string'
+        ], [
+            'periodo_inicio.before_or_equal' => 'La fecha de inicio no puede ser mayor al día actual.',
+            'periodo_fin.before_or_equal'    => 'La fecha de fin no puede ser mayor al día actual.',
         ]);
 
         EjecucionNomina::create([
@@ -125,5 +129,25 @@ class NominaController extends Controller
             ->findOrFail($itemId);
 
         return view('nomina.recibo_detalle', compact('item'));
+    }
+
+    public function anular(Request $request, $id)
+    {
+        $request->validate([
+            'motivo' => 'required|string|min:10|max:255'
+        ]);
+
+        $ejecucion = EjecucionNomina::findOrFail($id);
+
+        if ($ejecucion->estado === 'Procesando...') {
+            return redirect()->back()->with('error', 'No se puede anular una nómina en proceso.');
+        }
+
+        $ejecucion->update([
+            'estado'     => 'Anulada',
+            'comentario' => 'ANULADA: ' . $request->motivo . ' (Por ' . Auth::user()->name . ' el ' . now()->format('d/m/Y H:i') . ')'
+        ]);
+
+        return redirect()->route('nomina.index')->with('success', 'Nómina anulada correctamente.');
     }
 }

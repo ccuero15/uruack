@@ -26,22 +26,30 @@
                         </thead>
                         <tbody>
                             @foreach ($empleados as $emp)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 border-b">{{ $emp->cedula }}</td>
-                                    <td class="px-6 py-4 border-b">{{ $emp->nombre }} {{ $emp->apellido }}</td>
-                                    <td class="px-6 py-4 border-b">
-                                        <span
-                                            class="px-2 py-1 rounded text-xs {{ $emp->estado == 'Activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            {{ $emp->estado }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 border-b">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 border-b">{{ $emp->cedula }}</td>
+                                <td class="px-6 py-4 border-b">{{ $emp->nombre }} {{ $emp->apellido }}</td>
+                                <td class="px-6 py-4 border-b">
+                                    <span
+                                        class="px-2 py-1 rounded text-xs {{ $emp->estado == 'Activo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $emp->estado }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 border-b">
+                                    <div class="flex items-center space-x-3">
                                         <a href="{{ route('empleados.edit', $emp) }}"
-                                            class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
+                                            class="text-indigo-600 hover:text-indigo-900">Editar</a>
                                         <a href="{{ route('contratos.index', ['empleado_id' => $emp->id]) }}"
                                             class="text-green-600 hover:text-green-900">Contrato</a>
-                                    </td>
-                                </tr>
+                                        @if($emp->estado == 'Activo')
+                                        <form id="desactivar-empleado-{{ $emp->id }}" action="{{ route('empleados.desactivar', $emp->id) }}" method="POST">
+                                            @csrf
+                                            <button type="button" onclick="confirmDelete('desactivar-empleado-{{ $emp->id }}', '¿Deseas desactivar a este empleado?')" class="text-red-600 hover:text-red-900 font-bold">Desactivar</button>
+                                        </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
                             @endforeach
                         </tbody>
                     </table>

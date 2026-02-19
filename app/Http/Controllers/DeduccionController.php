@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Deduccion;
+use App\Models\Beneficio;
 use Illuminate\Http\Request;
 
 class DeduccionController extends Controller
 {
     public function index()
     {
-        $deducciones = \App\Models\Deduccion::all();
-        $beneficios = \App\Models\Beneficio::all(); // Cargamos ambos para la vista unificada
+        $deducciones = Deduccion::all();
+        $beneficios = Beneficio::all();
         return view('configuracion.conceptos', compact('deducciones', 'beneficios'));
     }
 
@@ -18,7 +19,7 @@ class DeduccionController extends Controller
     {
         $data = $request->validate([
             'nombre' => 'required|string|max:100',
-            'tasa' => 'required|numeric|min:0',
+            'tasa' => 'required|numeric|min:0|max:9999999999.99',
             'tipo' => 'required|in:Fijo,Porcentaje',
         ]);
         Deduccion::create($data);
@@ -29,7 +30,7 @@ class DeduccionController extends Controller
     {
         $data = $request->validate([
             'nombre' => 'required|string|max:100',
-            'tasa' => 'required|numeric|min:0',
+            'tasa' => 'required|numeric|min:0|max:9999999999.99',
             'tipo' => 'required|in:Fijo,Porcentaje',
         ]);
         $deduccion->update($data);

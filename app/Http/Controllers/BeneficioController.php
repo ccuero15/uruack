@@ -7,32 +7,36 @@ use Illuminate\Http\Request;
 
 class BeneficioController extends Controller
 {
-public function index() {
-    return redirect()->route('deducciones.index');
-}
+    public function index()
+    {
+        return redirect()->route('deducciones.index');
+    }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $data = $request->validate([
             'nombre' => 'required|string|max:100',
-            'tasa' => 'required|numeric|min:0',
+            'tasa' => 'required|numeric|min:0|max:9999999999.99',
             'tipo' => 'required|in:Fijo,Porcentaje',
         ]);
         Beneficio::create($data);
-        return redirect()->back()->with('success', 'Deducción creada.');
+        return redirect()->back()->with('success', 'Beneficio creado.');
     }
 
-    public function update(Request $request, Beneficio $deduccion) {
+    public function update(Request $request, Beneficio $beneficio)
+    {
         $data = $request->validate([
             'nombre' => 'required|string|max:100',
-            'tasa' => 'required|numeric|min:0',
+            'tasa' => 'required|numeric|min:0|max:9999999999.99',
             'tipo' => 'required|in:Fijo,Porcentaje',
         ]);
-        $deduccion->update($data);
-        return redirect()->back()->with('success', 'Deducción actualizada.');
+        $beneficio->update($data);
+        return redirect()->back()->with('success', 'Beneficio actualizado.');
     }
 
-    public function destroy(Beneficio $deduccion) {
-        $deduccion->delete();
-        return redirect()->back()->with('success', 'Deducción eliminada.');
+    public function destroy(Beneficio $beneficio)
+    {
+        $beneficio->delete();
+        return redirect()->back()->with('success', 'Beneficio eliminado.');
     }
 }

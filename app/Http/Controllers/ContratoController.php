@@ -19,27 +19,28 @@ class ContratoController extends Controller
         return view('contratos.index', compact('contratos'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $selectedEmpleadoId = $request->get('empleado_id');
         $empleados = Empleado::where('estado', 'Activo')->get();
         $cargos = Cargo::all();
         $jornadas = JornadaLaboral::all();
-        return view('contratos.create', compact('empleados', 'cargos', 'jornadas'));
+        return view('contratos.create', compact('empleados', 'cargos', 'jornadas', 'selectedEmpleadoId'));
     }
 
     public function store(Request $request)
     {
         try {
-            // 1. Validación estricta
+            // 1. Validación estricta coincidiendo con migración
             $data = $request->validate([
                 'empleado_id'   => 'required|exists:empleados,id',
                 'cargo_id'      => 'required|exists:cargos,id',
                 'jornada_id'    => 'required|exists:jornadas_laborales,id',
-                'fecha_inicio'  => 'required|date',
-                'fecha_fin'     => 'nullable|date|after_or_equal:fecha_inicio',
-                'salario_base'  => 'required|numeric|min:0',
                 'tipo_contrato' => 'required|string|max:100',
-                'estado'        => 'required|in:Vigente,Vencido,Finalizado',
+                'fecha_inicio'  => 'required|date|before_or_equal:today',
+                'fecha_fin'     => 'nullable|date|after:fecha_inicio',
+                'salario_base'  => 'required|numeric|min:0|max:9999999999.99',
+                'estado'        => 'required|in:Vigente,Vencido,Finalizado,Anulado',
             ]);
 
             // 2. Transacción para asegurar integridad

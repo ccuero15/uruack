@@ -35,17 +35,7 @@ Route::middleware('auth')->group(function () {
 
     // Recursos Maestros
     Route::resource('empleados', EmpleadoController::class);
-    // Route::resource('contratos', ContratoController::class);
-    // Route::resource('cargos', CargoController::class);
-
-    Route::get('/nomina/reporte-general/{id}', [NominaReporteController::class, 'general'])->name('nomina.reporte.general');
-
-    // Configuración de Nómina
-    Route::resource('deducciones', DeduccionController::class)->except(['show', 'create', 'edit']);
-    Route::resource('beneficios', BeneficioController::class)->except(['show', 'create', 'edit']);
-
-
-    Route::resource('empleados', EmpleadoController::class);
+    Route::post('/empleados/{id}/desactivar', [EmpleadoController::class, 'desactivar'])->name('empleados.desactivar');
     Route::resource('cargos', CargoController::class);
     Route::resource('contratos', ContratoController::class);
     Route::resource('deducciones', DeduccionController::class);
@@ -53,13 +43,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('incidencias', IncidenciaController::class);
     Route::resource('tipos-incidencia', TipoIncidenciaController::class);
 
-    Route::resource('tipos-incidencia', TipoIncidenciaController::class)->only(['index', 'store']);
-    Route::resource('incidencias', IncidenciaController::class);
+    Route::get('/nomina/reporte-general/{id}', [NominaReporteController::class, 'general'])->name('nomina.reporte.general');
+
     Route::prefix('nomina')->group(function () {
         Route::get('/', [NominaController::class, 'index'])->name('nomina.index');
         Route::get('/crear', [NominaController::class, 'create'])->name('nomina.create');
         Route::post('/', [NominaController::class, 'store'])->name('nomina.store');
         Route::post('/{id}/procesar', [NominaController::class, 'procesar'])->name('nomina.procesar');
+        Route::post('/{id}/anular', [NominaController::class, 'anular'])->name('nomina.anular');
         Route::get('/detalle/{id}', [NominaController::class, 'show'])->name('nomina.show');
         Route::get('/recibo/{id}', [NominaController::class, 'verRecibo'])->name('nomina.recibo');
     });

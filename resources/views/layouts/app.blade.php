@@ -14,6 +14,20 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        window.confirmAction = function(options) {
+            return Swal.fire({
+                title: options.title || '¿Estás seguro?',
+                text: options.text || 'Esta acción no se puede deshacer.',
+                icon: options.icon || 'warning',
+                showCancelButton: true,
+                confirmButtonColor: options.confirmButtonColor || '#3085d6',
+                cancelButtonColor: options.cancelButtonColor || '#d33',
+                confirmButtonText: options.confirmButtonText || 'Sí, continuar',
+                cancelButtonText: options.cancelButtonText || 'Cancelar'
+            });
+        }
+    </script>
 </head>
 
 <body class="font-sans antialiased">
@@ -22,13 +36,13 @@
         @include('layouts.navigation')
         <!-- Header -->
 
- 
+
         @isset($header)
-            <header class="bg-white shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                {{ $header }}
+            </div>
+        </header>
         @endisset
 
         <!-- Page Content -->
@@ -37,15 +51,15 @@
         </main>
 
         @if (session('error'))
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                {{ session('error') }}
-            </div>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+            {{ session('error') }}
+        </div>
         @endif
 
         @if (session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                {{ session('success') }}
-            </div>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+            {{ session('success') }}
+        </div>
         @endif
 
     </div>

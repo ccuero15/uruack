@@ -9,14 +9,14 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
 
             @if ($errors->any())
-                <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 shadow-sm">
-                    <p class="font-bold">Se encontraron errores:</p>
-                    <ul class="mt-2 list-disc list-inside text-sm">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
+            <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 shadow-sm">
+                <p class="font-bold">Se encontraron errores:</p>
+                <ul class="mt-2 list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
             @endif
 
             <div class="bg-white p-8 shadow rounded-lg border-t-4 border-indigo-600">
@@ -32,10 +32,10 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
                                 <option value="">-- Elija un empleado --</option>
                                 @foreach ($empleados as $e)
-                                    <option value="{{ $e->id }}"
-                                        {{ old('empleado_id') == $e->id ? 'selected' : '' }}>
-                                        {{ $e->cedula }} - {{ $e->nombre }} {{ $e->apellido }}
-                                    </option>
+                                <option value="{{ $e->id }}"
+                                    {{ (old('empleado_id') ?? $selectedEmpleadoId) == $e->id ? 'selected' : '' }}>
+                                    {{ $e->cedula }} - {{ $e->nombre }} {{ $e->apellido }}
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -47,10 +47,10 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
                                 <option value="">-- Elija un cargo --</option>
                                 @foreach ($cargos as $c)
-                                    <option value="{{ $c->id }}"
-                                        {{ old('cargo_id') == $c->id ? 'selected' : '' }}>
-                                        {{ $c->titulo }} ({{ $c->departamento }})
-                                    </option>
+                                <option value="{{ $c->id }}"
+                                    {{ old('cargo_id') == $c->id ? 'selected' : '' }}>
+                                    {{ $c->titulo }} ({{ $c->departamento }})
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -61,14 +61,14 @@
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
                                 <option value="">-- Seleccione una jornada --</option>
                                 @foreach ($jornadas as $j)
-                                    <option value="{{ $j->id }}"
-                                        {{ old('jornada_id') == $j->id ? 'selected' : '' }}>
-                                        {{ $j->nombre }} ({{ $j->horas_diarias }}h diarias)
-                                    </option>
+                                <option value="{{ $j->id }}"
+                                    {{ old('jornada_id') == $j->id ? 'selected' : '' }}>
+                                    {{ $j->nombre }} ({{ $j->horas_diarias }}h diarias)
+                                </option>
                                 @endforeach
                             </select>
                             @error('jornada_id')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>

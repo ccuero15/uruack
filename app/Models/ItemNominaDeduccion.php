@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ItemNominaDeduccion extends Model
 {
     protected $table = 'item_nomina_deduccion';
-    protected $fillable = ['item_nomina_id', 'deduccion_id', 'monto'];
+    protected $fillable = ['item_nomina_id', 'deduccion_id', 'monto', 'descripcion'];
 
     public function itemNomina()
     {

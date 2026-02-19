@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\EjecucionNomina;
 use App\Models\Empleado;
-use App\Models\Contrato;
 use App\Models\Deduccion;
 use App\Models\Beneficio;
 use App\Models\Incidencia;
@@ -84,7 +83,19 @@ class NominaService
                 $sd = $salarioBruto / 30;
                 $sh = $sd / 8;
 
-                if ($inc->horas_extras > 0) {
+                // Lógica de "Injustificado": Descontar el día completo
+                $esInjustificado = str_contains(strtolower($tipo->nombre), 'injustificada');
+
+                if ($esInjustificado) {
+                    $monto = $sd; // Día completo sin importar horas o rango.
+                    // Si el usuario registró un rango de días, multiplicamos.
+                    if ($inc->fecha_fin) {
+                        $start = Carbon::parse($inc->fecha_inicio);
+                        $end = Carbon::parse($inc->fecha_fin);
+                        $dias = $start->diffInDays($end) + 1;
+                        $monto = $sd * $dias;
+                    }
+                } elseif ($inc->horas_extras > 0) {
                     $monto = $sh * $tipo->factor * $inc->horas_extras;
                 } else {
                     $start = Carbon::parse($inc->fecha_inicio);
@@ -94,8 +105,20 @@ class NominaService
                 }
 
                 if ($tipo->tipo_ajuste === 'Suma') {
+                    ItemNominaBeneficio::create([
+                        'item_nomina_id' => $itemNomina->id,
+                        'beneficio_id'   => null,
+                        'monto'          => $monto,
+                        'descripcion'    => $tipo->nombre . ($inc->horas_extras > 0 ? " ({$inc->horas_extras}h)" : "")
+                    ]);
                     $totalBeneficios += $monto;
                 } elseif ($tipo->tipo_ajuste === 'Resta') {
+                    ItemNominaDeduccion::create([
+                        'item_nomina_id' => $itemNomina->id,
+                        'deduccion_id'   => null,
+                        'monto'          => $monto,
+                        'descripcion'    => $tipo->nombre . ($esInjustificado ? " (Día Completo)" : "")
+                    ]);
                     $totalDeducciones += $monto;
                 }
             }

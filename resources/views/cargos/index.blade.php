@@ -10,9 +10,9 @@
                 </div>
 
                 @if(session('error'))
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                        {{ session('error') }}
-                    </div>
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ session('error') }}
+                </div>
                 @endif
 
                 <div class="overflow-x-auto">
@@ -34,9 +34,9 @@
                                 <td class="px-6 py-4 border-b text-center text-sm">
                                     <div class="flex justify-center gap-3">
                                         <a href="{{ route('cargos.edit', $cargo) }}" class="text-blue-600 hover:text-blue-900">Editar</a>
-                                        <form action="{{ route('cargos.destroy', $cargo) }}" method="POST" onsubmit="return confirm('¿Eliminar este cargo?')">
+                                        <form id="delete-cargo-{{ $cargo->id }}" action="{{ route('cargos.destroy', $cargo) }}" method="POST">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
+                                            <button type="button" onclick="confirmDelete('delete-cargo-{{ $cargo->id }}', '¿Deseas eliminar este cargo?')" class="text-red-600 hover:text-red-900">Eliminar</button>
                                         </form>
                                     </div>
                                 </td>

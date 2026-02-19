@@ -33,9 +33,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $d->tasa }}{{ $d->tipo == 'Porcentaje' ? '%' : '$' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $d->tipo }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                <form action="{{ route('deducciones.destroy', $d) }}" method="POST" onsubmit="return confirm('¿Eliminar?')">
+                                <form id="delete-deduccion-{{ $d->id }}" action="{{ route('deducciones.destroy', $d) }}" method="POST">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Eliminar</button>
+                                    <button type="button" onclick="confirmDelete('delete-deduccion-{{ $d->id }}')" class="text-red-600 hover:text-red-900 font-bold">Eliminar</button>
                                 </form>
                             </td>
                         </tr>
@@ -71,9 +71,9 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $b->tasa }}{{ $b->tipo == 'Porcentaje' ? '%' : '$' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $b->tipo }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                <form action="{{ route('beneficios.destroy', $b) }}" method="POST" onsubmit="return confirm('¿Eliminar?')">
+                                <form id="delete-beneficio-{{ $b->id }}" action="{{ route('beneficios.destroy', $b) }}" method="POST">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Eliminar</button>
+                                    <button type="button" onclick="confirmDelete('delete-beneficio-{{ $b->id }}')" class="text-red-600 hover:text-red-900 font-bold">Eliminar</button>
                                 </form>
                             </td>
                         </tr>

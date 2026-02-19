@@ -74,14 +74,14 @@
                         </tr>
                         @foreach($item->detallesBeneficios as $detalle)
                         <tr>
-                            <td class="py-3 px-2 text-sm text-gray-600">{{ $detalle->beneficio->nombre }}</td>
+                            <td class="py-3 px-2 text-sm text-gray-600">{{ $detalle->descripcion ?? $detalle->beneficio?->nombre ?? 'Asignación' }}</td>
                             <td class="py-3 px-2 text-sm text-green-600 text-right font-medium">+${{ number_format($detalle->monto, 2) }}</td>
                             <td class="py-3 px-2 text-sm text-gray-800 text-right">-</td>
                         </tr>
                         @endforeach
                         @foreach($item->detallesDeducciones as $detalle)
                         <tr>
-                            <td class="py-3 px-2 text-sm text-gray-600">{{ $detalle->deduccion->nombre }}</td>
+                            <td class="py-3 px-2 text-sm text-gray-600">{{ $detalle->descripcion ?? $detalle->deduccion?->nombre ?? 'Deducción' }}</td>
                             <td class="py-3 px-2 text-sm text-gray-800 text-right">-</td>
                             <td class="py-3 px-2 text-sm text-red-600 text-right font-medium">-${{ number_format($detalle->monto, 2) }}</td>
                         </tr>

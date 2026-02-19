@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contrato extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     // Nombre de la tabla (opcional si sigue la convención plural)
     protected $table = 'contratos';

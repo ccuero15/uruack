@@ -40,9 +40,9 @@
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex justify-center gap-3">
                                         <a href="{{ route('incidencias.edit', $inc) }}" class="text-blue-600 hover:text-blue-900 text-sm font-bold">Editar</a>
-                                        <form action="{{ route('incidencias.destroy', $inc) }}" method="POST" onsubmit="return confirm('¿Eliminar esta incidencia?')">
+                                        <form id="delete-incidencia-{{ $inc->id }}" action="{{ route('incidencias.destroy', $inc) }}" method="POST">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 text-sm font-bold">Borrar</button>
+                                            <button type="button" onclick="confirmDelete('delete-incidencia-{{ $inc->id }}', '¿Deseas eliminar esta incidencia?')" class="text-red-600 hover:text-red-900 text-sm font-bold">Borrar</button>
                                         </form>
                                     </div>
                                 </td>
