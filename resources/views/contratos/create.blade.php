@@ -87,10 +87,10 @@
                             <select name="tipo_contrato" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                 <option value="Tiempo Indeterminado"
                                     {{ old('tipo_contrato') == 'Tiempo Indeterminado' ? 'selected' : '' }}>Tiempo
-                                    Indeterminado</option>
+                                    Indeterminado (Fijo)</option>
                                 <option value="Tiempo Determinado"
                                     {{ old('tipo_contrato') == 'Tiempo Determinado' ? 'selected' : '' }}>Tiempo
-                                    Determinado (Fijo)</option>
+                                    Determinado</option>
                             </select>
                         </div>
 

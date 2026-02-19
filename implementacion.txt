@@ -1,0 +1,43 @@
+Integración de Incidencias en Nómina (LOTTT)
+Este plan detalla los cambios necesarios para que las incidencias se calculen automáticamente siguiendo la legislación venezolana (LOTTT).
+
+User Review Required
+IMPORTANT
+
+Se han ajustado las fórmulas siguiendo la LOTTT (Venezuela):
+
+Salario Diario (SD): Salario Base / 30 (Art. 113).
+Salario Hora (SH): SD / Horas Jornada (habitualmente 8h).
+Horas Extras Diurnas: SH * 1.5 (50% recargo, Art. 118).
+Horas Extras Nocturnas: 
+(SH * 1.3) * 1.5 = SH * 1.95
+ (30% bono nocturno + 50% extra, Art. 117 y 118).
+Inasistencias: SD * factor (Descuento simple).
+Proposed Changes
+Database & Models
+[NEW] 
+2026_02_18_100000_update_tipo_incidencias_table.php
+Añadir columna tipo_ajuste (ENUM: 'Suma', 'Resta', 'Informativo').
+Añadir columna factor (Decimal, default 1.0).
+[MODIFY] 
+TipoIncidencia.php
+Actualizar $fillable con tipo_ajuste y factor.
+Business Logic
+[MODIFY] 
+NominaService.php
+Modificar 
+procesarEmpleado
+ para buscar incidencias en el periodo de la nómina.
+Implementar lógica de cálculo basada en las fórmulas LOTTT detalladas arriba.
+Integrar el resultado en el salario_neto.
+Seeders
+[MODIFY] 
+TipoIncidenciaSeeder.php
+Pre-configurar las incidencias comunes con sus factores LOTTT (ej. Diurna: 1.5, Nocturna: 1.95).
+Verification Plan
+Manual Verification
+Registrar 2 horas extras diurnas para un empleado.
+Procesar nómina.
+Validar que el pago sea exactamente 
+(Salario / 30 / 8) * 2 * 1.5
+.

@@ -6,8 +6,10 @@ use App\Models\EjecucionNomina;
 use App\Models\Empleado;
 use App\Models\ItemNomina;
 use App\Services\NominaService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class NominaController extends Controller
 {
@@ -94,7 +96,7 @@ class NominaController extends Controller
 
             return redirect()->route('nomina.index')
                 ->with('success', 'Nómina procesada correctamente. Total: $' . number_format($totalNomina, 2));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             // 5. Registrar el error en el comentario de la ejecución
@@ -103,7 +105,7 @@ class NominaController extends Controller
                 'comentario' => 'Error al procesar: ' . $e->getMessage()
             ]);
 
-            \Log::error("Error procesando nómina ID {$ejecucion->id}: " . $e->getMessage());
+            Log::error("Error procesando nómina ID {$ejecucion->id}: " . $e->getMessage());
 
             return redirect()->route('nomina.index')
                 ->with('error', 'Error al procesar: ' . $e->getMessage());

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TipoIncidencia extends Model
 {
     protected $table = 'tipos_incidencia';
-    protected $fillable = ['nombre', 'afecta_pago'];
+    protected $fillable = ['nombre', 'afecta_pago', 'tipo_ajuste', 'factor'];
 
     public function incidencias()
     {

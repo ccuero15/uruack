@@ -2,14 +2,17 @@
 
 namespace App\Services;
 
+use App\Models\EjecucionNomina;
 use App\Models\Empleado;
 use App\Models\Contrato;
 use App\Models\Deduccion;
 use App\Models\Beneficio;
+use App\Models\Incidencia;
 use App\Models\ItemNomina;
 use App\Models\ItemNominaDeduccion;
 use App\Models\ItemNominaBeneficio;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class NominaService
 {
@@ -63,6 +66,38 @@ class NominaService
                     'monto'          => $monto
                 ]);
                 $totalBeneficios += $monto;
+            }
+
+            // 4. Procesar Incidencias (LOTTT)
+            $ejecucion = EjecucionNomina::findOrFail($ejecucionId);
+            $incidencias = Incidencia::with('tipoIncidencia')
+                ->where('empleado_id', $empleadoId)
+                ->where('fecha_inicio', '>=', $ejecucion->periodo_inicio)
+                ->where('fecha_inicio', '<=', $ejecucion->periodo_fin)
+                ->get();
+
+            foreach ($incidencias as $inc) {
+                $tipo = $inc->tipoIncidencia;
+                if ($tipo->tipo_ajuste === 'Informativo') continue;
+
+                $monto = 0;
+                $sd = $salarioBruto / 30;
+                $sh = $sd / 8;
+
+                if ($inc->horas_extras > 0) {
+                    $monto = $sh * $tipo->factor * $inc->horas_extras;
+                } else {
+                    $start = Carbon::parse($inc->fecha_inicio);
+                    $end = $inc->fecha_fin ? Carbon::parse($inc->fecha_fin) : $start;
+                    $dias = $start->diffInDays($end) + 1;
+                    $monto = $sd * $tipo->factor * $dias;
+                }
+
+                if ($tipo->tipo_ajuste === 'Suma') {
+                    $totalBeneficios += $monto;
+                } elseif ($tipo->tipo_ajuste === 'Resta') {
+                    $totalDeducciones += $monto;
+                }
             }
 
             // 4. Actualizar totales finales

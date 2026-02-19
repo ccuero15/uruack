@@ -6,8 +6,10 @@ use App\Models\Contrato;
 use App\Models\Empleado;
 use App\Models\Cargo;
 use App\Models\JornadaLaboral;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ContratoController extends Controller
 {
@@ -53,10 +55,10 @@ class ContratoController extends Controller
 
             return redirect()->route('contratos.index')
                 ->with('success', 'Contrato vinculado exitosamente.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             // Laravel maneja esto y vuelve a la vista con $errors
             throw $e;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Error de base de datos o lógica (ej: el error de null que tenías)
             return redirect()->back()
                 ->withInput()
