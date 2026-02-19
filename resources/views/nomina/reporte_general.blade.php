@@ -27,18 +27,11 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            @php
-                                $grandTotalBruto = 0;
-                                $grandTotalBen = 0;
-                                $grandTotalDed = 0;
-                                $grandTotalNeto = 0;
-                            @endphp
-
                             @foreach($nomina->items as $item)
                             <tr class="hover:bg-gray-50">
                                 <td class="border border-gray-300 px-4 py-2 text-sm">
-                                    {{ $item->empleado->nombre }} {{ $item->empleado->apellido }}
-                                    <div class="text-xs text-gray-400">{{ $item->empleado->cedula }}</div>
+                                    {{ $item->empleado->nombre }} {{ $item->apellido }}
+                                    <div class="text-xs text-gray-400">{{ $item->cedula }}</div>
                                 </td>
                                 <td class="border border-gray-300 px-4 py-2 text-xs text-gray-600">
                                     {{ $item->empleado->contratos->where('estado','Vigente')->first()->cargo->titulo ?? 'N/A' }}
@@ -56,21 +49,15 @@
                                     ${{ number_format($item->salario_neto, 2) }}
                                 </td>
                             </tr>
-                            @php
-                                $grandTotalBruto += $item->salario_bruto;
-                                $grandTotalBen += $item->total_beneficios;
-                                $grandTotalDed += $item->total_deducciones;
-                                $grandTotalNeto += $item->salario_neto;
-                            @endphp
                             @endforeach
                         </tbody>
                         <tfoot class="bg-gray-800 text-white font-bold">
                             <tr>
                                 <td colspan="2" class="px-4 py-3 text-right uppercase text-xs">Totales Generales:</td>
-                                <td class="px-4 py-3 text-right">${{ number_format($grandTotalBruto, 2) }}</td>
-                                <td class="px-4 py-3 text-right">${{ number_format($grandTotalBen, 2) }}</td>
-                                <td class="px-4 py-3 text-right">${{ number_format($grandTotalDed, 2) }}</td>
-                                <td class="px-4 py-3 text-right bg-indigo-700">${{ number_format($grandTotalNeto, 2) }}</td>
+                                <td class="px-4 py-3 text-right">${{ number_format($nomina->items->sum('salario_bruto'), 2) }}</td>
+                                <td class="px-4 py-3 text-right">${{ number_format($nomina->items->sum('total_beneficios'), 2) }}</td>
+                                <td class="px-4 py-3 text-right">${{ number_format($nomina->items->sum('total_deducciones'), 2) }}</td>
+                                <td class="px-4 py-3 text-right bg-indigo-700">${{ number_format($nomina->items->sum('salario_neto'), 2) }}</td>
                             </tr>
                         </tfoot>
                     </table>

@@ -53,14 +53,7 @@
                 <div class="text-right">
                     <p class="text-xs text-gray-500 uppercase">Cargo / Departamento</p>
                     <p class="font-bold text-gray-800">{{ $item->empleado->contratos->where('estado','Vigente')->first()->cargo->titulo ?? 'N/A' }}</p>
-                    @php
-                    $contratoVigente = $item->empleado->contratos->where('estado','Vigente')->first();
-                    @endphp
-                    @if ($contratoVigente && $contratoVigente->cargo && $contratoVigente->cargo->departamento)
-                    <p class="text-sm text-gray-600 uppercase">{{ $contratoVigente->cargo->departamento }}</p>
-                    @else
-                    <p class="text-sm text-gray-600 uppercase">General</p>
-                    @endif
+                    <p class="text-sm text-gray-600 uppercase">{{ $item->empleado->contratos->where('estado','Vigente')->first()?->cargo?->departamento ?? 'General' }}</p>
                 </div>
             </div>
 
