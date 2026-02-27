@@ -32,13 +32,5 @@ class DatabaseSeeder extends Seeder
             TipoIncidenciaSeeder::class,
         ]);
 
-        // Crear un usuario administrador de prueba relacionado con el Rol 1
-        \App\Models\User::factory()->create([
-            'name' => 'Admin Sistema',
-            'email' => 'admin@empresa.com',
-            'password' => bcrypt('password'),
-            'rol_id' => 1,
-            'activo' => true,
-        ]);
     }
 }

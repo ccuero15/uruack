@@ -37,9 +37,11 @@
                     <x-nav-link :href="route('cargos.index')" :active="request()->routeIs('cargos.*')">
                         {{ __('Cargos') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
-                        {{ __('Auditoría') }}
-                    </x-nav-link>
+                    @if (auth()->user()->rol_id == 1)
+                        <x-nav-link :href="route('auditoria.index')" :active="request()->routeIs('auditoria.*')">
+                            {{ __('Auditoría') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 

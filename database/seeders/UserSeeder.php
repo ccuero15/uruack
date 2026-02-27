@@ -20,5 +20,13 @@ class UserSeeder extends Seeder
             'rol_id' => 1,
             'activo' => true,
         ]);
+
+        User::create([
+            'name' => 'user',
+            'email' => 'user@user.com',
+            'password' => bcrypt('12345678'),
+            'rol_id' => 2,
+            'activo' => true,
+        ]);
     }
 }
