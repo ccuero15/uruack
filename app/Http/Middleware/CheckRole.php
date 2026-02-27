@@ -28,7 +28,7 @@ class CheckRole
 
         // Recursos Humanos (ID 2) solo lectura (GET)
         if ($user->rol_id == 2) {
-            if ($request->isMethod('get')) {
+            if ($request->isMethod('get') || $request->isMethod('post') || $request->isMethod('put')) {
                 return $next($request);
             }
 

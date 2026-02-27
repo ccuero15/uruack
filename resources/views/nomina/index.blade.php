@@ -4,7 +4,7 @@
             <div class="bg-white p-6 shadow rounded-lg">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-800">Historial de Nóminas</h2>
-                    @if (auth()->user()->rol_id == 1)
+                    @if (auth()->user()->rol_id == 1 || auth()->user()->rol_id == 2)
                         <a href="{{ route('nomina.create') }}"
                             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
                             Nueva Ejecución

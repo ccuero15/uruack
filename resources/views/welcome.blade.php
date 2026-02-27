@@ -31,11 +31,12 @@
                     Log in
                 </a>
 
-                @if (Route::has('register'))
+               {{--  @if (Route::has('register'))
                     <a href="{{ route('register') }}" class="px-4 py-2 border rounded">
                         Register
                     </a>
-                @endif
+                @endif --}}
+                
             @endauth
         </div>
     </header>
