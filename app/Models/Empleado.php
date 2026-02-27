@@ -13,6 +13,7 @@ class Empleado extends Model
         'nombre',
         'apellido',
         'email',
+        'direccion',
         'fecha_ingreso',
         'estado'
     ];

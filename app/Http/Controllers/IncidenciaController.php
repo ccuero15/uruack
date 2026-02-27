@@ -36,12 +36,16 @@ class IncidenciaController extends Controller
             'observacion' => 'nullable|string|max:255',
         ]);
 
-        // 2. Crear el registro en la base de datos
-        Incidencia::create($data);
+        try {
+            // 2. Crear el registro en la base de datos
+            Incidencia::create($data);
 
-        // 3. Redireccionar con mensaje de éxito
-        return redirect()->route('incidencias.index')
-            ->with('success', 'La incidencia ha sido registrada correctamente y será tomada en cuenta para la próxima nómina.');
+            // 3. Redireccionar con mensaje de éxito
+            return redirect()->route('incidencias.index')
+                ->with('success', 'La incidencia ha sido registrada correctamente y será tomada en cuenta para la próxima nómina.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al registrar la incidencia: ' . $e->getMessage());
+        }
     }
 
     public function edit(Incidencia $incidencia)
@@ -62,13 +66,21 @@ class IncidenciaController extends Controller
             'observacion' => 'nullable|string',
         ]);
 
-        $incidencia->update($data);
-        return redirect()->route('incidencias.index')->with('success', 'Incidencia actualizada.');
+        try {
+            $incidencia->update($data);
+            return redirect()->route('incidencias.index')->with('success', 'Incidencia actualizada.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al actualizar la incidencia: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Incidencia $incidencia)
     {
-        $incidencia->delete();
-        return redirect()->route('incidencias.index')->with('success', 'Incidencia eliminada.');
+        try {
+            $incidencia->delete();
+            return redirect()->route('incidencias.index')->with('success', 'Incidencia eliminada.');
+        } catch (\Exception $e) {
+            return redirect()->route('incidencias.index')->with('error', 'Error al eliminar la incidencia: ' . $e->getMessage());
+        }
     }
 }

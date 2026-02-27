@@ -26,8 +26,12 @@ class CargoController extends Controller
             'salario_referencial' => 'nullable|numeric|min:0',
         ]);
 
-        Cargo::create($data);
-        return redirect()->route('cargos.index')->with('success', 'Cargo creado exitosamente.');
+        try {
+            Cargo::create($data);
+            return redirect()->route('cargos.index')->with('success', 'Cargo creado exitosamente.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al crear el cargo: ' . $e->getMessage());
+        }
     }
 
     public function edit(Cargo $cargo)
@@ -43,18 +47,26 @@ class CargoController extends Controller
             'salario_referencial' => 'nullable|numeric|min:0',
         ]);
 
-        $cargo->update($data);
-        return redirect()->route('cargos.index')->with('success', 'Cargo actualizado.');
+        try {
+            $cargo->update($data);
+            return redirect()->route('cargos.index')->with('success', 'Cargo actualizado.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al actualizar el cargo: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Cargo $cargo)
     {
-        // Validación: No eliminar si hay contratos asociados
-        if ($cargo->contratos()->count() > 0) {
-            return redirect()->route('cargos.index')->with('error', 'No se puede eliminar un cargo que tiene contratos asociados.');
-        }
+        try {
+            // Validación: No eliminar si hay contratos asociados
+            if ($cargo->contratos()->count() > 0) {
+                return redirect()->route('cargos.index')->with('error', 'No se puede eliminar un cargo que tiene contratos asociados.');
+            }
 
-        $cargo->delete();
-        return redirect()->route('cargos.index')->with('success', 'Cargo eliminado.');
+            $cargo->delete();
+            return redirect()->route('cargos.index')->with('success', 'Cargo eliminado.');
+        } catch (\Exception $e) {
+            return redirect()->route('cargos.index')->with('error', 'Error al eliminar el cargo: ' . $e->getMessage());
+        }
     }
 }

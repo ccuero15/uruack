@@ -39,17 +39,21 @@ class NominaController extends Controller
             'periodo_fin.before_or_equal'    => 'La fecha de fin no puede ser mayor al día actual.',
         ]);
 
-        EjecucionNomina::create([
-            'periodo_inicio'  => $request->periodo_inicio,
-            'periodo_fin'     => $request->periodo_fin,
-            'fecha_ejecucion' => now(),
-            'total_pagado'    => 0,
-            'estado'          => 'Borrador',
-            'comentario'      => $request->comentario ?? 'Borrador creado manualmente'
-        ]);
+        try {
+            EjecucionNomina::create([
+                'periodo_inicio'  => $request->periodo_inicio,
+                'periodo_fin'     => $request->periodo_fin,
+                'fecha_ejecucion' => now(),
+                'total_pagado'    => 0,
+                'estado'          => 'Borrador',
+                'comentario'      => $request->comentario ?? 'Borrador creado manualmente'
+            ]);
 
-        return redirect()->route('nomina.index')
-            ->with('success', 'Borrador de nómina creado correctamente.');
+            return redirect()->route('nomina.index')
+                ->with('success', 'Borrador de nómina creado correctamente.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al crear la nómina: ' . $e->getMessage());
+        }
     }
 
     // Proceso masivo de generación
@@ -137,17 +141,21 @@ class NominaController extends Controller
             'motivo' => 'required|string|min:10|max:255'
         ]);
 
-        $ejecucion = EjecucionNomina::findOrFail($id);
+        try {
+            $ejecucion = EjecucionNomina::findOrFail($id);
 
-        if ($ejecucion->estado === 'Procesando...') {
-            return redirect()->back()->with('error', 'No se puede anular una nómina en proceso.');
+            if ($ejecucion->estado === 'Procesando...') {
+                return redirect()->back()->with('error', 'No se puede anular una nómina en proceso.');
+            }
+
+            $ejecucion->update([
+                'estado'     => 'Anulada',
+                'comentario' => 'ANULADA: ' . $request->motivo . ' (Por ' . Auth::user()->name . ' el ' . now()->format('d/m/Y H:i') . ')'
+            ]);
+
+            return redirect()->route('nomina.index')->with('success', 'Nómina anulada correctamente.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al anular la nómina: ' . $e->getMessage());
         }
-
-        $ejecucion->update([
-            'estado'     => 'Anulada',
-            'comentario' => 'ANULADA: ' . $request->motivo . ' (Por ' . Auth::user()->name . ' el ' . now()->format('d/m/Y H:i') . ')'
-        ]);
-
-        return redirect()->route('nomina.index')->with('success', 'Nómina anulada correctamente.');
     }
 }

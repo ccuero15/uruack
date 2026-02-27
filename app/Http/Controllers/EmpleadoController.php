@@ -31,13 +31,19 @@ class EmpleadoController extends Controller
             'estado' => 'required|in:Activo,Inactivo,Suspendido',
         ]);
 
-        Empleado::create($data);
-        return redirect()->route('empleados.index')->with('success', 'Empleado registrado correctamente.');
+        try {
+            Empleado::create($data);
+            return redirect()->route('empleados.index')->with('success', 'Empleado registrado correctamente.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al registrar el empleado: ' . $e->getMessage());
+        }
     }
 
     public function edit(Empleado $empleado)
     {
-        return view('empleados.edit', compact('empleado'));
+        $cargos = \App\Models\Cargo::all();
+        $contratoVigente = $empleado->contratos()->where('estado', 'Vigente')->first();
+        return view('empleados.edit', compact('empleado', 'cargos', 'contratoVigente'));
     }
 
     public function update(Request $request, Empleado $empleado)
@@ -47,23 +53,47 @@ class EmpleadoController extends Controller
             'nombre' => 'required|string|max:100',
             'apellido' => 'required|string|max:100',
             'email' => "nullable|email|max:150|unique:empleados,email,{$empleado->id}",
-            'direccion' => 'nullable|string',
             'fecha_ingreso' => 'required|date|before_or_equal:today',
             'estado' => 'required|in:Activo,Inactivo,Suspendido',
+            // Campos opcionales del contrato
+            'salario_base' => 'nullable|numeric|min:0',
+            'cargo_id' => 'nullable|exists:cargos,id',
         ]);
 
-        $empleado->update($data);
-        return redirect()->route('empleados.index')->with('success', 'Datos del empleado actualizados.');
+        try {
+            DB::transaction(function () use ($empleado, $data) {
+                $empleado->update($data);
+
+                // Si se enviaron datos de contrato y existe un contrato vigente, actualizarlo
+                if (isset($data['salario_base']) || isset($data['cargo_id'])) {
+                    $contrato = $empleado->contratos()->where('estado', 'Vigente')->first();
+                    if ($contrato) {
+                        $contrato->update(array_filter([
+                            'salario_base' => $data['salario_base'] ?? null,
+                            'cargo_id' => $data['cargo_id'] ?? null,
+                        ]));
+                    }
+                }
+            });
+
+            return redirect()->route('empleados.index')->with('success', 'Datos del empleado y contrato actualizados.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al actualizar el empleado: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Empleado $empleado)
     {
-        if ($empleado->itemsNomina()->count() > 0) {
-            return redirect()->back()->with('error', 'No se puede eliminar físicamente: el empleado tiene historial de nómina. Considere desactivarlo.');
-        }
+        try {
+            if ($empleado->itemsNomina()->count() > 0) {
+                return redirect()->back()->with('error', 'No se puede eliminar físicamente: el empleado tiene historial de nómina. Considere desactivarlo.');
+            }
 
-        $empleado->delete();
-        return redirect()->route('empleados.index')->with('success', 'Empleado eliminado (Soft Delete).');
+            $empleado->delete();
+            return redirect()->route('empleados.index')->with('success', 'Empleado eliminado (Soft Delete).');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al eliminar el empleado: ' . $e->getMessage());
+        }
     }
 
     public function desactivar($id)

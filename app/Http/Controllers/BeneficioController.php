@@ -19,8 +19,13 @@ class BeneficioController extends Controller
             'tasa' => 'required|numeric|min:0|max:9999999999.99',
             'tipo' => 'required|in:Fijo,Porcentaje',
         ]);
-        Beneficio::create($data);
-        return redirect()->back()->with('success', 'Beneficio creado.');
+
+        try {
+            Beneficio::create($data);
+            return redirect()->back()->with('success', 'Beneficio creado.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al crear el beneficio: ' . $e->getMessage());
+        }
     }
 
     public function update(Request $request, Beneficio $beneficio)
@@ -30,13 +35,22 @@ class BeneficioController extends Controller
             'tasa' => 'required|numeric|min:0|max:9999999999.99',
             'tipo' => 'required|in:Fijo,Porcentaje',
         ]);
-        $beneficio->update($data);
-        return redirect()->back()->with('success', 'Beneficio actualizado.');
+
+        try {
+            $beneficio->update($data);
+            return redirect()->back()->with('success', 'Beneficio actualizado.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error al actualizar el beneficio: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Beneficio $beneficio)
     {
-        $beneficio->delete();
-        return redirect()->back()->with('success', 'Beneficio eliminado.');
+        try {
+            $beneficio->delete();
+            return redirect()->back()->with('success', 'Beneficio eliminado.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al eliminar el beneficio: ' . $e->getMessage());
+        }
     }
 }

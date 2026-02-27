@@ -9,8 +9,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Empleado</label>
-                            <select name="empleado_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
-                                @foreach($empleados as $e)
+                            <select name="empleado_id"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
+                                @foreach ($empleados as $e)
                                     <option value="{{ $e->id }}">{{ $e->nombre }} {{ $e->apellido }}</option>
                                 @endforeach
                             </select>
@@ -18,32 +19,51 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Tipo de Incidencia</label>
-                            <select name="tipo_incidencia_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
-                                @foreach($tipos as $t)
-                                    <option value="{{ $t->id }}">{{ $t->nombre }} ({{ $t->afecta_pago ? 'Afecta Pago' : 'Informativa' }})</option>
+                            <select name="tipo_incidencia_id"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
+                                @foreach ($tipos as $t)
+                                    <option value="{{ $t->id }}">{{ $t->nombre }}
+                                        ({{ $t->afecta_pago ? 'Afecta Pago' : 'Informativa' }})</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
-                            <input type="date" name="fecha_inicio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <input type="date" name="fecha_inicio" required
+                                value="{{ old('fecha_inicio', date('Y-m-d')) }}"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('fecha_inicio') border-red-500 @enderror">
+                            @error('fecha_inicio')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Horas Extras (si aplica)</label>
-                            <input type="number" step="0.5" name="horas_extras" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="0.00">
+                            <input type="number" step="0.01" name="horas_extras" value="{{ old('horas_extras') }}"
+                                min="0" max="999.99"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('horas_extras') border-red-500 @enderror"
+                                placeholder="0.00">
+                            @error('horas_extras')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700">Observaciones</label>
-                            <textarea name="observacion" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                            <textarea name="observacion" rows="3" maxlength="500"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm @error('observacion') border-red-500 @enderror">{{ old('observacion') }}</textarea>
+                            @error('observacion')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
                     <div class="mt-6 flex justify-end gap-3">
-                        <a href="{{ route('incidencias.index') }}" class="px-4 py-2 text-gray-600 underline">Cancelar</a>
-                        <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
+                        <a href="{{ route('incidencias.index') }}"
+                            class="px-4 py-2 text-gray-600 underline">Cancelar</a>
+                        <button type="submit"
+                            class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">
                             Guardar Incidencia
                         </button>
                     </div>

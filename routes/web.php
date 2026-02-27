@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/detalle/{id}', [NominaController::class, 'show'])->name('nomina.show');
         Route::get('/recibo/{id}', [NominaController::class, 'verRecibo'])->name('nomina.recibo');
     });
+    Route::get('/auditoria', [\App\Http\Controllers\AuditoriaController::class, 'index'])->name('auditoria.index');
 });
 
 require __DIR__ . '/auth.php';
